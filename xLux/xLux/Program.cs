@@ -150,6 +150,40 @@ namespace xLux
 
         }
 
+        private static float ComboDamage(Obj_AI_Base enemy)
+        {
+            double damage = 0d;
+
+            if (Dfg.IsReady())
+                damage += player.GetItemDamage(enemy, Damage.DamageItems.Dfg) / 1.2;
+
+            if (Q.IsReady())
+                damage += player.GetSpellDamage(enemy, SpellSlot.Q);
+
+            if (R.IsReady())
+                damage += player.GetSpellDamage(enemy, SpellSlot.R);
+
+            if (Dfg.IsReady())
+                damage = damage * 1.2;
+
+            if (E.IsReady())
+                damage += player.GetSpellDamage(enemy, SpellSlot.E);
+
+            if (IgniteSlot != SpellSlot.Unknown && player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                damage += ObjectManager.Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
+
+            if (Items.HasItem(3155, (Obj_AI_Hero)enemy))
+            {
+                damage = damage - 250;
+            }
+
+            if (Items.HasItem(3156, (Obj_AI_Hero)enemy))
+            {
+                damage = damage - 400;
+            }
+            return (float)damage;
+        }
+
         private static void Laneclear()
         {
             if (xMenu.SubMenu("Laneclear").Item("laneclearW").GetValue<bool>() && E.IsReady())
@@ -235,31 +269,56 @@ namespace xLux
             var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             if (target == null) return;
 
-            if (Dfg.IsReady() && xMenu.Item("useItems").GetValue<bool>() == true)
+            float dmg = ComboDamage(target);
+
+            if (dmg > target.Health + 20)
             {
-                Dfg.Cast(target);
+                if (Dfg.IsReady() && xMenu.Item("useItems").GetValue<bool>() == true)
+                {
+                    Dfg.Cast(target);
+                }
+
+                if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
+                {
+                    Q.Cast(target, xMenu.Item("Packet").GetValue<bool>());
+
+
+
+                }
+
+                if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true)
+                {
+                    E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
+                    E.Cast();
+                }
+
+
+
+                if (target.IsValidTarget(R.Range) && R.IsReady() && target.HasBuff("LuxLightBindingMis"))
+                {
+                    R.CastOnUnit(target, xMenu.Item("Packet").GetValue<bool>());
+                }
+                
             }
 
-            if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
+            else
             {
-                Q.Cast(target, xMenu.Item("Packet").GetValue<bool>());
+                if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
+                {
+                    Q.Cast(target, xMenu.Item("Packet").GetValue<bool>());
 
 
 
+                }
+
+                if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true)
+                {
+                    E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
+                    E.Cast();
+                }
             }
 
-            if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true)
-            {
-                E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
-                E.Cast();
-            }
-
-
-
-            if (target.IsValidTarget(R.Range) && R.IsReady() && target.HasBuff("LuxLightBindingMis"))
-            {
-                R.CastOnUnit(target, xMenu.Item("Packet").GetValue<bool>());
-            }
+            
 
 
 
