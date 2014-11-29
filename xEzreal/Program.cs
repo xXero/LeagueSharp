@@ -134,7 +134,7 @@ namespace Ezreal
                 W.Cast(target, xMenu.Item("Packet").GetValue<bool>());
             }
 
-            if (target.IsValidTarget(R.Range) && R.IsReady() && xMenu.Item("KillR").GetValue<bool>() == true && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health)
+            if (target.IsValidTarget(3000) && R.IsReady() && xMenu.Item("KillR").GetValue<bool>() == true && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health)
             {
                 R.Cast(target, xMenu.Item("Packet").GetValue<bool>());
             }
