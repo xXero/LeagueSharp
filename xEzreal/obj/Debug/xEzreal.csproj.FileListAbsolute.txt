@@ -1,1 +1,2 @@
 c:\users\sebastian\documents\visual studio 2013\Projects\xEzreal\xEzreal\bin\Debug\xEzreal.exe.config
+C:\Users\Sebastian\Documents\GitHub\LeagueSharp\xEzreal\bin\Debug\xEzreal.exe.config

@@ -56,6 +56,13 @@ namespace Ezreal
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useR", "Use R?").SetValue(true));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
 
+            xMenu.AddSubMenu(new Menu("Harass", "Harass"));
+            xMenu.SubMenu("Harass").AddItem(new MenuItem("hQ", "Use Q?").SetValue(true));
+            xMenu.SubMenu("Harass").AddItem(new MenuItem("hW", "Use W?").SetValue(true));
+            xMenu.SubMenu("Harass").AddItem(new MenuItem("Harassmana", "Mana to use").SetValue(new Slider(30)));
+            xMenu.SubMenu("Combo").AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind('C', KeyBindType.Press)));
+            xMenu.SubMenu("Combo").AddItem(new MenuItem("HarassToogle", "Harass").SetValue(new KeyBind('T', KeyBindType.Toggle, false)));
+
             xMenu.AddSubMenu(new Menu("Killsteal", "Killsteal"));
             xMenu.SubMenu("Killsteal").AddItem(new MenuItem("KillQ", "Steal with Q?").SetValue(true));
             xMenu.SubMenu("Killsteal").AddItem(new MenuItem("KillW", "Steal with W?").SetValue(true));
@@ -85,6 +92,11 @@ namespace Ezreal
             if (xMenu.Item("ComboActive").GetValue<KeyBind>().Active)
             {
                 Combo();
+            }
+
+            if (xMenu.Item("HarassActive").GetValue<KeyBind>().Active || xMenu.Item("HarassToggle").GetValue<KeyBind>().Active)
+            {
+                Harass();
             }
 
             KillSteal();
@@ -152,6 +164,38 @@ namespace Ezreal
                 }
 
             }
+
+
+
+
+        }
+
+
+
+        public static void Harass()
+        {
+            
+            if (player.Mana / player.MaxMana * 100 < xMenu.SubMenu("Harass").Item("harassmana").GetValue<Slider>().Value)
+                return;
+
+            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            if (target == null)
+                return;
+            {
+                if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("hQ").GetValue<bool>() == true)
+                {
+                    Q.Cast(target, xMenu.Item("Packet").GetValue<bool>());
+                }
+
+                if (target.IsValidTarget(W.Range) && W.IsReady() && xMenu.Item("hW").GetValue<bool>() == true)
+                {
+                    W.Cast(target, xMenu.Item("Packet").GetValue<bool>());
+                }
+
+
+            }
+
+
 
 
 
