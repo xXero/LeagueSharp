@@ -17,6 +17,7 @@ namespace Ezreal
         private static readonly Obj_AI_Hero player = ObjectManager.Player;
         public static Spell Q, W, R;
         public static SpellSlot IgniteSlot;
+        public static Items.Item Dfg, Gunblade;
 
         static void Main(string[] args)
         {
@@ -40,6 +41,8 @@ namespace Ezreal
 
             IgniteSlot = player.GetSpellSlot("SummonerDot");
 
+            Dfg = new Items.Item(3128, 750f);
+            Gunblade = new Items.Item(3146, 700f);
          
             xMenu = new Menu("x" + ChampName, ChampName, true);
           
@@ -54,6 +57,7 @@ namespace Ezreal
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useQ", "Use Q?").SetValue(true));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useW", "Use W?").SetValue(true));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useR", "Use R?").SetValue(true));
+            xMenu.SubMenu("Combo").AddItem(new MenuItem("useItems", "Use Items?").SetValue(true));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
 
             xMenu.AddSubMenu(new Menu("Harass", "Harass"));
@@ -207,6 +211,17 @@ namespace Ezreal
         {
             var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             if (target == null) return;
+
+
+            if (Gunblade.IsReady() && xMenu.Item("useItems").GetValue<bool>() == true)
+            {
+                Gunblade.Cast(target);
+            }
+
+            if (Dfg.IsReady() && xMenu.Item("useItems").GetValue<bool>() == true)
+            {
+                Dfg.Cast(target);
+            }
 
             if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
             {

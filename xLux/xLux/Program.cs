@@ -17,6 +17,7 @@ namespace xLux
         private static readonly Obj_AI_Hero player = ObjectManager.Player;
         public static Spell Q, E, E2, R;
         public static SpellSlot IgniteSlot;
+        public static Items.Item Dfg;
 
         static void Main(string[] args)
         {
@@ -38,6 +39,7 @@ namespace xLux
             E.SetSkillshot(0.15f, 275f, 1300f, false, SkillshotType.SkillshotCircle);
             E2.SetSkillshot(0.15f, 275f, 1300f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(1.75f, 190f, 3000, false, SkillshotType.SkillshotLine);
+            Dfg = new Items.Item(3128, 750f);
 
             IgniteSlot = player.GetSpellSlot("SummonerDot");
 
@@ -55,6 +57,7 @@ namespace xLux
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useQ", "Use Q?").SetValue(true));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useE", "Use E?").SetValue(true));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useR", "Use R?").SetValue(true));
+            xMenu.SubMenu("Combo").AddItem(new MenuItem("useItems", "Use Items?").SetValue(true));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
 
             xMenu.AddSubMenu(new Menu("Harass", "Harass"));
@@ -132,12 +135,12 @@ namespace xLux
 
             if (xMenu.Item("DrawE").GetValue<bool>() == true)
             {
-                Utility.DrawCircle(ObjectManager.Player.Position, E.Range, Color.Red);
+                Utility.DrawCircle(ObjectManager.Player.Position, E.Range, Color.Orange);
             }
 
             if (xMenu.Item("DrawR").GetValue<bool>() == true)
             {
-                Utility.DrawCircle(ObjectManager.Player.Position, R.Range, Color.Red);
+                Utility.DrawCircle(player.Position, R.Range, Color.Blue, 5, 30, true);
             }
 
             if (xMenu.Item("DrawAA").GetValue<bool>() == true)
@@ -231,6 +234,11 @@ namespace xLux
         {
             var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
             if (target == null) return;
+
+            if (Dfg.IsReady() && xMenu.Item("useItems").GetValue<bool>() == true)
+            {
+                Dfg.Cast(target);
+            }
 
             if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
             {
