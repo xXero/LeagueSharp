@@ -62,10 +62,10 @@ namespace Ezreal
             xMenu.SubMenu("Killsteal").AddItem(new MenuItem("KillR", "Steal with R?").SetValue(true));
             xMenu.SubMenu("Killsteal").AddItem(new MenuItem("KillI", "Steal with Ignite?").SetValue(true));
 
-            xMenu.AddSubMenu(new Menu("Combo", "Combo"));
-            xMenu.SubMenu("Combo").AddItem(new MenuItem("DrawQ", "Draw Q?").SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
-            xMenu.SubMenu("Combo").AddItem(new MenuItem("DrawW", "Draw W?").SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
-            xMenu.SubMenu("Combo").AddItem(new MenuItem("DrawAA", "Draw Range?").SetValue(new Circle(true, Color.FromArgb(100, 255, 0, 255))));
+            xMenu.AddSubMenu(new Menu("Drawing", "Drawing"));
+            xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawQ", "Draw Q?").SetValue(true));
+            xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawW", "Draw W?").SetValue(true));
+            xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawAA", "Draw Range?").SetValue(true));
             
 
 
@@ -99,7 +99,19 @@ namespace Ezreal
 
         static void Drawing_OnDraw(EventArgs args)
         {
+            if (xMenu.Item("DrawQ").GetValue<bool>() == true)
+            {
+                Utility.DrawCircle(player.Position, Q.Range, Color.Red);
+            }
 
+            if (xMenu.Item("DrawW").GetValue<bool>() == true)
+            {
+                Utility.DrawCircle(player.Position, W.Range, Color.Orange);
+            }
+            if (xMenu.Item("DrawAA").GetValue<bool>() == true)
+            {
+                Utility.DrawCircle(player.Position, player.AttackRange, Color.Blue);
+            }
             
 
 
