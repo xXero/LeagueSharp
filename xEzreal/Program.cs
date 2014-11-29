@@ -60,8 +60,8 @@ namespace Ezreal
             xMenu.SubMenu("Harass").AddItem(new MenuItem("hQ", "Use Q?").SetValue(true));
             xMenu.SubMenu("Harass").AddItem(new MenuItem("hW", "Use W?").SetValue(true));
             xMenu.SubMenu("Harass").AddItem(new MenuItem("Harassmana", "Mana to use").SetValue(new Slider(30)));
-            xMenu.SubMenu("Combo").AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind('C', KeyBindType.Press)));
-            xMenu.SubMenu("Combo").AddItem(new MenuItem("HarassToogle", "Harass").SetValue(new KeyBind('T', KeyBindType.Toggle, false)));
+            xMenu.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind('C', KeyBindType.Press)));
+            xMenu.SubMenu("Harass").AddItem(new MenuItem("HarassToogle", "Harass").SetValue(new KeyBind('T', KeyBindType.Toggle, false)));
 
             xMenu.AddSubMenu(new Menu("Killsteal", "Killsteal"));
             xMenu.SubMenu("Killsteal").AddItem(new MenuItem("KillQ", "Steal with Q?").SetValue(true));
