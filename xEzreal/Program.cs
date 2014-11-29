@@ -175,7 +175,7 @@ namespace Ezreal
         public static void Harass()
         {
              if (player.Mana / player.MaxMana * 100 < xMenu.SubMenu("Harass").Item("Harassmana").GetValue<Slider>().Value)
--                return;
+                return;
             
 
             var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
