@@ -1,0 +1,4 @@
+LeagueSharp
+===========
+
+LeagueSharp Assemblys
