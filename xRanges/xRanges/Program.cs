@@ -31,7 +31,7 @@ namespace xRanges
             xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawAR", "Draw Ally Range?").SetValue(true));
             xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawAA", "Draw My Range?").SetValue(true));
 
-
+           
 
 
            
@@ -48,30 +48,36 @@ namespace xRanges
         static void Drawing_OnDraw(EventArgs args)
         {
             
-            if (xMenu.Item("DrawAA").GetValue<bool>())
-            {
-                Utility.DrawCircle(player.Position, player.AttackRange, Color.Blue);
-            }
-
-            if( xMenu.Item("DrawER").GetValue<bool>()){
-            foreach (Obj_AI_Hero enemy in ObjectManager.Get<Obj_AI_Hero>())
-            {
-                if (enemy.IsEnemy && enemy.IsVisible && enemy.IsValid && !enemy.IsDead)
+         
+            
+                if (xMenu.Item("DrawAA").GetValue<bool>())
                 {
-                    Utility.DrawCircle(enemy.Position, enemy.AttackRange, Color.Red);
+                    Utility.DrawCircle(player.Position, player.AttackRange, Color.Blue);
                 }
-            }}
-            if (xMenu.Item("DrawAR").GetValue<bool>())
-            {
-                foreach (Obj_AI_Hero ally in ObjectManager.Get<Obj_AI_Hero>())
+
+                if (xMenu.Item("DrawER").GetValue<bool>())
                 {
-                    if (ally.IsAlly && ally.IsVisible && ally.IsValid && !ally.IsDead && !ally.PlayerControlled)
+                    foreach (Obj_AI_Hero enemy in ObjectManager.Get<Obj_AI_Hero>())
                     {
-                        Utility.DrawCircle(ally.Position, ally.AttackRange, Color.Green);
+                        if (enemy.IsEnemy && enemy.IsVisible && enemy.IsValid && !enemy.IsDead)
+                        {
+                            Utility.DrawCircle(enemy.Position, enemy.AttackRange, Color.Red);
+                        }
                     }
                 }
-            }
+                if (xMenu.Item("DrawAR").GetValue<bool>())
+                {
 
+                    foreach (Obj_AI_Hero ally in ObjectManager.Get<Obj_AI_Hero>())
+                    {
+                        if (ally.IsAlly && ally.IsVisible && ally.IsValid && !ally.IsDead && !ally.PlayerControlled)
+                        {
+                            Utility.DrawCircle(ally.Position, ally.AttackRange, Color.Green);
+                        }
+                    }
+                }
+            
+           
 
 
 
