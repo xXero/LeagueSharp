@@ -68,7 +68,8 @@ namespace xWard
         {
             
             var circleRange = 125f;
-
+if (xMenu.Item("Draww").GetValue<bool>())
+{
             Utility.DrawCircle(new Vector3(2524, 10406, 54f), circleRange, Color.Blue);
             Utility.DrawCircle(new Vector3(1774, 10756, 52f), circleRange, Color.Blue);
             Utility.DrawCircle(new Vector3(5520, 6342, 51f), circleRange, Color.Blue);
@@ -98,7 +99,7 @@ namespace xWard
             Utility.DrawCircle(new Vector3(9697, 7854, 51f), circleRange, Color.Green);
             Utility.DrawCircle(new Vector3(12235, 4068, -68f), circleRange, Color.Green);
             Utility.DrawCircle(new Vector3(12443, 4021, -7f), circleRange, Color.Green); 
-                
+}
 
             }
 
