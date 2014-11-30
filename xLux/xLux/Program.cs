@@ -16,6 +16,7 @@ namespace xLux
         public static Orbwalking.Orbwalker Orbwalker;
         private static readonly Obj_AI_Hero player = ObjectManager.Player;
         public static Spell Q, E, E2, R;
+        private static GameObject EObject;
         public static SpellSlot IgniteSlot;
         public static Items.Item Dfg;
 
@@ -63,7 +64,7 @@ namespace xLux
             xMenu.AddSubMenu(new Menu("Harass", "Harass"));
             xMenu.SubMenu("Harass").AddItem(new MenuItem("hQ", "Harass with Q?").SetValue(true));
             xMenu.SubMenu("Harass").AddItem(new MenuItem("hE", "Harras with E").SetValue(true));
-            xMenu.SubMenu("Harass").AddItem(new MenuItem("Harassmana", "Mana to Harass").SetValue(new Slider(30)));
+           
             xMenu.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind('C', KeyBindType.Press)));
             xMenu.SubMenu("Harass").AddItem(new MenuItem("HarassToggle", "Harass").SetValue(new KeyBind('T', KeyBindType.Toggle)));
 
@@ -87,9 +88,9 @@ namespace xLux
             xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawR", "DrawR?").SetValue(true));
             xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawAA", "Draw Range?").SetValue(true));
 
-
-            xMenu.AddItem(new MenuItem("Packet", "Packet Casting").SetValue(true));
-
+            xMenu.AddSubMenu(new Menu("Misc", "Misc"));
+            xMenu.SubMenu("Misc").AddItem(new MenuItem("Packet", "Packet Casting").SetValue(true));
+            xMenu.SubMenu("Misc").AddItem(new MenuItem("JSteal", "Jungle Steal").SetValue(true));
 
          
             xMenu.AddToMainMenu();
@@ -115,7 +116,7 @@ namespace xLux
             {
                 Laneclear();
             }
-
+            JungleSteal();
             KillSteal();
         }
 
@@ -140,7 +141,7 @@ namespace xLux
 
             if (xMenu.Item("DrawR").GetValue<bool>() == true)
             {
-                Utility.DrawCircle(player.Position, R.Range, Color.Blue, 5, 30, true);
+                Utility.DrawCircle(player.Position, R.Range, Color.Blue, 7, 20, true);
             }
 
             if (xMenu.Item("DrawAA").GetValue<bool>() == true)
@@ -149,6 +150,12 @@ namespace xLux
             }
 
         }
+
+        private static float GetDistanceSqr(Obj_AI_Hero source, Obj_AI_Base Target)
+        {
+            return Vector2.DistanceSquared(source.Position.To2D(), Target.ServerPosition.To2D());
+        }
+
 
         private static float ComboDamage(Obj_AI_Base enemy)
         {
@@ -192,10 +199,32 @@ namespace xLux
 
                 if (farmLocation.MinionsHit >= xMenu.SubMenu("Laneclear").Item("laneclearnum").GetValue<Slider>().Value && player.Distance(farmLocation.Position) <= E.Range)
                     E.Cast(farmLocation.Position);
-                E.Cast();
+                CastE2();
             }
         }
 
+        private static void JungleSteal()
+        {
+            var Minions = MinionManager.GetMinions(Game.CursorPos, 1000, MinionTypes.All, MinionTeam.Neutral);
+            foreach (var minion in Minions.Where(minion => minion.IsVisible && !minion.IsDead))
+            {
+                if ((minion.SkinName == "SRU_Blue" || minion.SkinName == "SRU_Red" || minion.SkinName == "SRU_Baron" || minion.SkinName == "SRU_Dragon") &&
+                                ComboDamage(minion) > minion.Health && xMenu.Item("JSteal").GetValue<bool>()== true)
+                {
+                    if (Q.IsReady() && GetDistanceSqr(player, minion) <= Q.Range * Q.Range) Q.Cast(minion, xMenu.Item("Packet").GetValue<bool>());
+                    if (E.IsReady() && GetDistanceSqr(player, minion) <= E.Range * E.Range)
+                    {
+                        E.Cast(minion, xMenu.Item("Packet").GetValue<bool>());
+                        while (EObject != null)
+                        {
+                            E.CastOnUnit(player, xMenu.Item("Packet").GetValue<bool>());
+                            break;
+                        }
+                    }
+                    if (R.IsReady() && minion.IsValidTarget(R.Range)) R.Cast(minion, xMenu.Item("Packet").GetValue<bool>());
+                }
+            }
+        }
 
 
         public static void KillSteal()
@@ -211,7 +240,7 @@ namespace xLux
             if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("KillE").GetValue<bool>() == true && ObjectManager.Player.GetSpellDamage(target, SpellSlot.E) > target.Health)
             {
                 E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
-                E2.Cast();
+                CastE2();
             }
 
             if (target.IsValidTarget(R.Range) && R.IsReady() && xMenu.Item("KillR").GetValue<bool>() == true && ObjectManager.Player.GetSpellDamage(target, SpellSlot.R) > target.Health)
@@ -241,8 +270,7 @@ namespace xLux
 
         public static void Harass()
         {
-            if (player.Mana / player.MaxMana * 100 > xMenu.SubMenu("Harass").Item("Harassmana").GetValue<Slider>().Value)
-                return;
+            
 
 
             var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
@@ -257,7 +285,7 @@ namespace xLux
                 if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("hE").GetValue<bool>() == true)
                 {
                     E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
-                    E.Cast();
+                    CastE2();
                 }
 
 
@@ -281,7 +309,7 @@ namespace xLux
                 if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
                 {
                     Q.Cast(target, xMenu.Item("Packet").GetValue<bool>());
-
+                    
 
 
                 }
@@ -289,7 +317,7 @@ namespace xLux
                 if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true)
                 {
                     E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
-                    E.Cast();
+                    E2.Cast();
                 }
 
 
@@ -314,12 +342,23 @@ namespace xLux
                 if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true)
                 {
                     E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
-                    E.Cast();
+                    E2.Cast();
                 }
-            }
+            }}
 
             
 
+             private static void CastE2()
+		{
+        	if (EObject == null) return;
+        	foreach (Obj_AI_Hero current in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsEnemy &&
+        	                          Vector3.Distance(EObject.Position, enemy.ServerPosition) <= E.Width+15))
+        	{
+				E.CastOnUnit(player);	
+				return;
+        	}
+			if (Vector3.Distance(player.Position, EObject.Position) > 800)	E.CastOnUnit(player);
+		}
 
 
 
@@ -330,4 +369,3 @@ namespace xLux
         }
 
     }
-}
