@@ -160,7 +160,7 @@ namespace xLux
 
             if (xMenu.Item("DrawR").GetValue<bool>() == true)
             {
-                Utility.DrawCircle(player.Position, R.Range, Color.Blue, 7, 20, true);
+                Utility.DrawCircle(player.Position, R.Range, Color.Blue, 5, 30, true);
             }
 
             if (xMenu.Item("DrawAA").GetValue<bool>() == true)
@@ -337,7 +337,7 @@ namespace xLux
 
                 }
 
-                if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true && target.HasBuff("LuxLightBindingMis"))
+                if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true)
                 {
                     E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
                     CastE2();
@@ -365,7 +365,7 @@ namespace xLux
 
                 }
 
-                if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true && target.HasBuff("LuxLightBindingMis"))
+                if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true)
                 {
                     E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
                     CastE2();
