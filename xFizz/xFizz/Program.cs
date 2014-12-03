@@ -148,7 +148,7 @@ namespace xFizz
                 Q.Cast(target, xMenu.Item("Packet").GetValue<bool>());
             }
 
-            if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("KillE").GetValue<bool>() == true && ObjectManager.Player.GetSpellDamage(target, SpellSlot.E-100) + player.GetSpellDamage(target, SpellSlot.E)> target.Health)
+            if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("KillE").GetValue<bool>() == true && player.GetSpellDamage(target, SpellSlot.E)> target.Health)
             {
                 E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
                 E2.Cast(target);
