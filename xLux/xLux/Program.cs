@@ -306,6 +306,10 @@ namespace xLux
                     E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
                     CastE2();
                 }
+                if (target.IsValidTarget(550) && target.HasBuff("luxilluminatingfraulein"))
+                {
+                    player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                }
 
 
             }
@@ -338,10 +342,13 @@ namespace xLux
                     E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
                     CastE2();
                 }
+                if (target.IsValidTarget(550) && target.HasBuff("luxilluminatingfraulein"))
+                {
+                    player.IssueOrder(GameObjectOrder.AttackUnit, target);
+                }
 
 
-
-                if (target.IsValidTarget(R.Range) && R.IsReady() && target.HasBuff("LuxLightBindingMis"))
+                if (target.IsValidTarget(R.Range) && R.IsReady() && target.HasBuff("LuxLightBindingMis") && target.Health + 20 < player.GetSpellDamage(target, SpellSlot.R))
                 {
                     R.CastOnUnit(target, xMenu.Item("Packet").GetValue<bool>());
                 }
