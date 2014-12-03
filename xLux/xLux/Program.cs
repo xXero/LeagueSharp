@@ -16,7 +16,7 @@ namespace xLux
         public static Orbwalking.Orbwalker Orbwalker;
         private static readonly Obj_AI_Hero player = ObjectManager.Player;
         public static Spell Q, E, E2, R;
-        private static GameObject EObject;
+        private static GameObject E2TargetObject;
         public static SpellSlot IgniteSlot;
         public static Items.Item Dfg;
 
@@ -33,12 +33,12 @@ namespace xLux
 
             Q = new Spell(SpellSlot.Q, 1175);
             E = new Spell(SpellSlot.E, 1075);
-            E2 = new Spell(SpellSlot.E, 1075);
+            
             R = new Spell(SpellSlot.R, 3340);
 
             Q.SetSkillshot(0.5f, 80f, 1200, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.15f, 275f, 1300f, false, SkillshotType.SkillshotCircle);
-            E2.SetSkillshot(0.15f, 275f, 1300f, false, SkillshotType.SkillshotCircle);
+           
             R.SetSkillshot(1.75f, 190f, 3000, false, SkillshotType.SkillshotLine);
             Dfg = new Items.Item(3128, 750f);
 
@@ -98,6 +98,8 @@ namespace xLux
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
             Game.PrintChat("x" + ChampName);
+            GameObject.OnCreate += OnCreateObject;
+            GameObject.OnDelete += OnDeleteObject;	
         }
 
         static void Game_OnGameUpdate(EventArgs args)
@@ -120,6 +122,23 @@ namespace xLux
             KillSteal();
         }
 
+        private static void OnCreateObject(GameObject sender, EventArgs args)
+        {
+            if (sender.Name.Contains("LuxLightstrike_tar_green"))
+            {
+                E2TargetObject = sender;
+                return;
+            }
+        }
+
+        private static void OnDeleteObject(GameObject sender, EventArgs args)
+        {
+            if (sender.Name.Contains("LuxLightstrike_tar_green"))
+            {
+                E2TargetObject = null;
+                return;
+            }
+        }	
 
         private static float GetIgniteDamage(Obj_AI_Hero enemy)
         {
@@ -215,7 +234,7 @@ namespace xLux
                     if (E.IsReady() && GetDistanceSqr(player, minion) <= E.Range * E.Range)
                     {
                         E.Cast(minion, xMenu.Item("Packet").GetValue<bool>());
-                        while (EObject != null)
+                        while (E2TargetObject != null)
                         {
                             E.CastOnUnit(player, xMenu.Item("Packet").GetValue<bool>());
                             break;
@@ -314,10 +333,10 @@ namespace xLux
 
                 }
 
-                if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true)
+                if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true && target.HasBuff("LuxLightBindingMis"))
                 {
                     E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
-                    E2.Cast();
+                    CastE2();
                 }
 
 
@@ -339,10 +358,10 @@ namespace xLux
 
                 }
 
-                if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true)
+                if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true && target.HasBuff("LuxLightBindingMis"))
                 {
                     E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
-                    E2.Cast();
+                    CastE2();
                 }
             }}
 
@@ -350,14 +369,14 @@ namespace xLux
 
              private static void CastE2()
 		{
-        	if (EObject == null) return;
+        	if (E2TargetObject == null) return;
         	foreach (Obj_AI_Hero current in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsValidTarget() && enemy.IsEnemy &&
-        	                          Vector3.Distance(EObject.Position, enemy.ServerPosition) <= E.Width+15))
+        	                          Vector3.Distance(E2TargetObject.Position, enemy.ServerPosition) <= E.Width+15))
         	{
 				E.CastOnUnit(player);	
 				return;
         	}
-			if (Vector3.Distance(player.Position, EObject.Position) > 800)	E.CastOnUnit(player);
+			if (Vector3.Distance(player.Position, E2TargetObject.Position) > 800)	E.CastOnUnit(player);
 		}
 
 
