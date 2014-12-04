@@ -64,7 +64,8 @@ namespace xLux
             xMenu.AddSubMenu(new Menu("Harass", "Harass"));
             xMenu.SubMenu("Harass").AddItem(new MenuItem("hQ", "Harass with Q?").SetValue(true));
             xMenu.SubMenu("Harass").AddItem(new MenuItem("hE", "Harras with E").SetValue(true));
-           
+            xMenu.SubMenu("Harass").AddItem(new MenuItem("manamanager", "Mana to use").SetValue(new Slider(30, 0, 100)));
+
             xMenu.SubMenu("Harass").AddItem(new MenuItem("HarassActive", "Harass").SetValue(new KeyBind('C', KeyBindType.Press)));
             xMenu.SubMenu("Harass").AddItem(new MenuItem("HarassToggle", "Harass").SetValue(new KeyBind('T', KeyBindType.Toggle)));
 
@@ -289,7 +290,8 @@ namespace xLux
 
         public static void Harass()
         {
-            
+            if (player.Mana / player.MaxMana * 100 < xMenu.Item("manamanager").GetValue<Slider>().Value)
+                return;
 
 
             var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);

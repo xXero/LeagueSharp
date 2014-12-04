@@ -181,6 +181,11 @@ namespace xFizz
 
         public static void Harass()
         {
+            Obj_AI_Turret closestTower = ObjectManager.Get<Obj_AI_Turret>().Where(tur => tur.IsAlly).OrderBy(tur => tur.Distance(player.Position)).First();
+                
+                                                
+                    
+                    
             if (player.Mana / player.MaxMana * 100 > xMenu.SubMenu("Harass").Item("Harassmana").GetValue<Slider>().Value)
                 return;
 
@@ -197,7 +202,7 @@ namespace xFizz
                 if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("hE").GetValue<bool>() == true)
                 {
                     E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
-                    E2.Cast(target);
+                    E2.Cast(closestTower.ServerPosition);
                 }
 
 
@@ -255,22 +260,24 @@ namespace xFizz
                      {
                             Dfg.Cast(target);
                          }
+                    if (target.IsValidTarget(Q.Range) && W.IsReady() && xMenu.Item("useW").GetValue<bool>() == true)
+                    {
+                        W.Cast(target, xMenu.Item("Packet").GetValue<bool>());
+                    }
+                    if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
+                    {
+                        Q.CastOnUnit(target, xMenu.Item("Packet").GetValue<bool>());
+
+
+
+                    }
                 if (target.IsValidTarget(R.Range) && R.IsReady())
             {
                 R.Cast(target, xMenu.Item("Packet").GetValue<bool>());
 
             }
-                if (target.IsValidTarget(W.Range) && W.IsReady() && xMenu.Item("useW").GetValue<bool>() == true)
-            {
-                W.Cast(target, xMenu.Item("Packet").GetValue<bool>());
-            }
-                if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
-            {
-                Q.CastOnUnit(target, xMenu.Item("Packet").GetValue<bool>());
-
-
-
-            }
+            
+            
                 if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true)
                 {
                     E.Cast(target, xMenu.Item("Packet").GetValue<bool>());
