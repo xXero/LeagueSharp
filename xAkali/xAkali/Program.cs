@@ -18,7 +18,7 @@ namespace xAkali
         public static Spell Q, E, W, R;
        
         public static SpellSlot IgniteSlot;
-        public static Items.Item Dfg;
+        public static Items.Item Dfg, Gunblade;
 
         static void Main(string[] args)
         {
@@ -36,7 +36,7 @@ namespace xAkali
             E = new Spell(SpellSlot.E, 325);
             R = new Spell(SpellSlot.R, 800);
 
-            
+            Gunblade = new Items.Item(3146, 700f);
             Dfg = new Items.Item(3128, 750f);
 
             IgniteSlot = player.GetSpellSlot("SummonerDot");
@@ -93,8 +93,11 @@ namespace xAkali
             xMenu.AddSubMenu(new Menu("Misc", "Misc"));
             xMenu.SubMenu("Misc").AddItem(new MenuItem("Packet", "Packet Casting").SetValue(true));
             xMenu.SubMenu("Misc").AddItem(new MenuItem("AW", "Auto W when > 15%").SetValue(true));
+
+            
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
             Utility.HpBarDamageIndicator.Enabled = xMenu.Item("DrawHP").GetValue<bool>();
+
 
             xMenu.AddToMainMenu();
 
@@ -122,6 +125,7 @@ namespace xAkali
             }
             
             KillSteal();
+
         }
 
      
@@ -156,21 +160,32 @@ namespace xAkali
 
         }
 
-       
 
+        public static int ultiCount()
+        {
+            foreach (BuffInstance buff in player.Buffs)
+                if (buff.Name == "AkaliShadowDance")
+                    return buff.Count;
+            return 0;
+        }
 
         private static float ComboDamage(Obj_AI_Base enemy)
         {
+
+            int UC = ultiCount();
+            int jumpCount = (UC - (int)(enemy.Distance(player.Position) / R.Range));
             double damage = 0d;
 
             if (Dfg.IsReady())
                 damage += player.GetItemDamage(enemy, Damage.DamageItems.Dfg) / 1.2;
 
+            if (Gunblade.IsReady())
+                damage += player.GetItemDamage(enemy, Damage.DamageItems.Hexgun);
+
             if (Q.IsReady())
                 damage += player.GetSpellDamage(enemy, SpellSlot.Q);
 
-            if (R.IsReady())
-                damage += player.GetSpellDamage(enemy, SpellSlot.R);
+            if (UC > 0) damage += jumpCount > 0 ? player.GetSpellDamage(enemy, SpellSlot.R) * jumpCount : player.GetSpellDamage(enemy, SpellSlot.R);
 
             if (Dfg.IsReady())
                 damage = damage * 1.2;
@@ -284,6 +299,11 @@ namespace xAkali
 
             if (dmg > target.Health + 20)
             {
+                if (Gunblade.IsReady() && xMenu.Item("useItems").GetValue<bool>())
+                {
+                    Dfg.Cast(target);
+                }
+
                 if (Dfg.IsReady() && xMenu.Item("useItems").GetValue<bool>() == true)
                 {
                     Dfg.Cast(target);
@@ -292,10 +312,11 @@ namespace xAkali
                 if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
                 {
                     Q.CastOnUnit(target, xMenu.Item("Packet").GetValue<bool>());
+                }
 
                     if (xMenu.Item("chaseR").GetValue<bool>())
                     {
-                        if (target.IsValidTarget(Q.Range + 100) && R.IsReady() && xMenu.Item("useR").GetValue<bool>())
+                        if (target.IsValidTarget(R.Range - 100) && R.IsReady() && xMenu.Item("useR").GetValue<bool>())
                         {
                             R.CastOnUnit(target);
 
@@ -309,7 +330,7 @@ namespace xAkali
                             R.CastOnUnit(target, xMenu.Item("Packet").GetValue<bool>());
                         }
 
-                    }
+                    
 
 
                 }
@@ -331,6 +352,7 @@ namespace xAkali
                 if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
                 {
                     Q.CastOnUnit(target, xMenu.Item("Packet").GetValue<bool>());
+                }
 
                     if (xMenu.Item("chaseR").GetValue<bool>())
                     {
@@ -350,7 +372,7 @@ namespace xAkali
 
                     }
 
-                }
+                
 
                 if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true)
                 {
