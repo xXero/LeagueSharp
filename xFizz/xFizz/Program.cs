@@ -80,11 +80,15 @@ namespace xFizz
             xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawQ", "Draw Q?").SetValue(true));
             xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawE", "Draw E?").SetValue(true));
             xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawAA", "Draw Range?").SetValue(true));
-
+            xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawHP", "Draw Damage?").SetValue(true));
 
 
 
             xMenu.AddItem(new MenuItem("Packet", "Packet Casting").SetValue(true));
+
+            Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
+            Utility.HpBarDamageIndicator.Enabled = xMenu.Item("DrawHP").GetValue<bool>();
+
 
             xMenu.AddToMainMenu();
 
