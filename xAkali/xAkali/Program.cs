@@ -68,7 +68,7 @@ namespace xAkali
             xMenu.SubMenu("Harass").AddItem(new MenuItem("HarassToggle", "Harass").SetValue(new KeyBind('T', KeyBindType.Toggle)));
 
             xMenu.AddSubMenu(new Menu("Laneclear", "Laneclear"));
-            xMenu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearW", "Clear with E?").SetValue(true));
+            xMenu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearE", "Clear with E?").SetValue(true));
             xMenu.SubMenu("Laneclear").AddItem(new MenuItem("laneclearnum", "Number of Minions").SetValue(new Slider(2, 1, 5)));
             xMenu.SubMenu("Laneclear").AddItem(new MenuItem("LaneclearActive", "Laneclear Active").SetValue(new KeyBind('V', KeyBindType.Press)));
 
@@ -92,7 +92,7 @@ namespace xAkali
 
             xMenu.AddSubMenu(new Menu("Misc", "Misc"));
             xMenu.SubMenu("Misc").AddItem(new MenuItem("Packet", "Packet Casting").SetValue(true));
-            xMenu.SubMenu("Misc").AddItem(new MenuItem("AW", "Auto W when > 15%").SetValue(true));
+            xMenu.SubMenu("Misc").AddItem(new MenuItem("AW", "Auto W when > %").SetValue(new Slider(25, 0, 100));
 
             
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
@@ -125,11 +125,20 @@ namespace xAkali
             }
             
             KillSteal();
+            AW();
 
         }
 
      
+        public static void AW()
+        {
+            if (player.Health / player.MaxHealth * 100 < xMenu.Item("AW").GetValue<Slider>().Value)
+            {
+                W.Cast(player);
+            }
 
+
+        }
         private static float GetIgniteDamage(Obj_AI_Hero enemy)
         {
             if (IgniteSlot == SpellSlot.Unknown || player.SummonerSpellbook.CanUseSpell(IgniteSlot) != SpellState.Ready) return 0f;
@@ -210,12 +219,14 @@ namespace xAkali
 
         private static void Laneclear()
         {
-            if (xMenu.SubMenu("Laneclear").Item("laneclearW").GetValue<bool>() && E.IsReady())
+            if (xMenu.SubMenu("Laneclear").Item("laneclearE").GetValue<bool>() && E.IsReady())
             {
-                var farmLocation = MinionManager.GetBestCircularFarmLocation(MinionManager.GetMinions(player.Position, E.Range).Select(minion => minion.ServerPosition.To2D()).ToList(), E.Width, E.Range);
-
-                if (farmLocation.MinionsHit >= xMenu.SubMenu("Laneclear").Item("laneclearnum").GetValue<Slider>().Value && player.Distance(farmLocation.Position) <= E.Range)
-                    E.Cast(farmLocation.Position);
+                if (MinionManager.GetMinions(player.Position, E.Range, MinionTypes.All, MinionTeam.Enemy).Count >= xMenu.SubMenu("Laneclear").Item("laneclearnum").GetValue<Slider>().Value) E.Cast();
+                foreach (Obj_AI_Base minion in MinionManager.GetMinions(player.ServerPosition, Q.Range,
+                      MinionTypes.All,
+                      MinionTeam.Neutral, MinionOrderTypes.MaxHealth))
+                    if (player.Distance(minion) <= E.Range)
+                        E.Cast();
                
             }
         }
@@ -301,7 +312,7 @@ namespace xAkali
             {
                 if (Gunblade.IsReady() && xMenu.Item("useItems").GetValue<bool>())
                 {
-                    Dfg.Cast(target);
+                    Gunblade.Cast(target);
                 }
 
                 if (Dfg.IsReady() && xMenu.Item("useItems").GetValue<bool>() == true)
