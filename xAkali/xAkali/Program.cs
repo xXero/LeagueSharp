@@ -92,7 +92,7 @@ namespace xAkali
 
             xMenu.AddSubMenu(new Menu("Misc", "Misc"));
             xMenu.SubMenu("Misc").AddItem(new MenuItem("Packet", "Packet Casting").SetValue(true));
-            xMenu.SubMenu("Misc").AddItem(new MenuItem("AW", "Auto W when > %").SetValue(new Slider(25, 0, 100));
+            xMenu.SubMenu("Misc").AddItem(new MenuItem("AW", "Auto W when > %").SetValue(new Slider(25, 0, 100)));
 
             
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
