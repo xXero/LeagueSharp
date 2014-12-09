@@ -103,7 +103,7 @@ namespace xAkali
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
-            Game.PrintChat("x" + ChampName + "Credits to ArcaneManiac for basic akali code!");
+            Game.PrintChat("x" + ChampName);
             
         }
 
