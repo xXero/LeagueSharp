@@ -18,7 +18,7 @@ namespace xAkali
         public static Spell Q, E, W, R;
        
         public static SpellSlot IgniteSlot;
-        public static Items.Item Dfg, Gunblade;
+        public static Items.Item Dfg, Gunblade, Zhonyas;
 
         static void Main(string[] args)
         {
@@ -38,6 +38,7 @@ namespace xAkali
 
             Gunblade = new Items.Item(3146, 700f);
             Dfg = new Items.Item(3128, 750f);
+            Zhonyas = new Items.Item(3157, 0f);
 
             IgniteSlot = player.GetSpellSlot("SummonerDot");
 
@@ -56,6 +57,7 @@ namespace xAkali
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useE", "Use E?").SetValue(true));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useR", "Use R?").SetValue(true));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("chaseR", "Use R to Chase (Only)?").SetValue(true));
+            xMenu.SubMenu("Combo").AddItem(new MenuItem("RRange", "Range to Chase R").SetValue(new Slider(500, 50, 800)));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useItems", "Use Items?").SetValue(true));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("ComboActive", "Combo").SetValue(new KeyBind(32, KeyBindType.Press)));
 
@@ -93,7 +95,7 @@ namespace xAkali
             xMenu.AddSubMenu(new Menu("Misc", "Misc"));
             xMenu.SubMenu("Misc").AddItem(new MenuItem("Packet", "Packet Casting").SetValue(true));
             xMenu.SubMenu("Misc").AddItem(new MenuItem("AW", "Auto W when > %").SetValue(new Slider(25, 0, 100)));
-
+            xMenu.SubMenu("Misc").AddItem(new MenuItem("Zhonyas", "Auto Zhonyas when > %").SetValue(new Slider(25, 0, 100)));
             
             Utility.HpBarDamageIndicator.DamageToUnit = ComboDamage;
             Utility.HpBarDamageIndicator.Enabled = xMenu.Item("DrawHP").GetValue<bool>();
@@ -103,7 +105,7 @@ namespace xAkali
 
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnGameUpdate += Game_OnGameUpdate;
-            Game.PrintChat("x" + ChampName + "Credits to ArcaneManiac for basic akali code!");
+            Game.PrintChat("x" + ChampName);
             
         }
 
@@ -126,6 +128,7 @@ namespace xAkali
             
             KillSteal();
             AW();
+            Z();
 
         }
 
@@ -135,6 +138,16 @@ namespace xAkali
             if (player.Health / player.MaxHealth * 100 < xMenu.Item("AW").GetValue<Slider>().Value)
             {
                 W.Cast(player);
+            }
+
+
+        }
+
+        public static void Z()
+        {
+            if (player.Health / player.MaxHealth * 100 < xMenu.Item("Zhonyas").GetValue<Slider>().Value)
+            {
+                Zhonyas.Cast(player);
             }
 
 
@@ -327,7 +340,7 @@ namespace xAkali
 
                     if (xMenu.Item("chaseR").GetValue<bool>())
                     {
-                        if (target.IsValidTarget(R.Range - 100) && R.IsReady() && xMenu.Item("useR").GetValue<bool>())
+                        if (target.IsValidTarget(xMenu.Item("RRange").GetValue<Slider>().Value) && R.IsReady() && xMenu.Item("useR").GetValue<bool>())
                         {
                             R.CastOnUnit(target);
 
