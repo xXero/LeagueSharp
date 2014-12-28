@@ -49,7 +49,7 @@ namespace xAkali
             Orbwalker = new Orbwalking.Orbwalker(xMenu.SubMenu("Orbwalker"));
 
             var ts = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(ts);
+            TargetSelector.AddToMenu(ts);
             xMenu.AddSubMenu(ts);
 
             xMenu.AddSubMenu(new Menu("Combo", "Combo"));
@@ -152,11 +152,7 @@ namespace xAkali
 
 
         }
-        private static float GetIgniteDamage(Obj_AI_Hero enemy)
-        {
-            if (IgniteSlot == SpellSlot.Unknown || player.SummonerSpellbook.CanUseSpell(IgniteSlot) != SpellState.Ready) return 0f;
-            return (float)player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
-        }
+      
 
         static void Drawing_OnDraw(EventArgs args)
         {
@@ -215,8 +211,8 @@ namespace xAkali
             if (E.IsReady())
                 damage += player.GetSpellDamage(enemy, SpellSlot.E);
 
-            if (IgniteSlot != SpellSlot.Unknown && player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-                damage += ObjectManager.Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
+            if (player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                damage += player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
 
             if (Items.HasItem(3155, (Obj_AI_Hero)enemy))
             {
@@ -238,7 +234,7 @@ namespace xAkali
                 foreach (Obj_AI_Base minion in MinionManager.GetMinions(player.ServerPosition, Q.Range,
                       MinionTypes.All,
                       MinionTeam.Neutral, MinionOrderTypes.MaxHealth))
-                    if (player.Distance(minion) <= E.Range)
+                    if (player.Distance(minion, false) <= E.Range)
                         E.Cast();
                
             }
@@ -248,9 +244,12 @@ namespace xAkali
 
 
         public static void KillSteal()
+
         {
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target == null) return;
+            var igniteDmg = player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
 
             if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("KillQ").GetValue<bool>() == true && ObjectManager.Player.GetSpellDamage(target, SpellSlot.Q) > target.Health)
             {
@@ -269,15 +268,12 @@ namespace xAkali
             }
 
 
-            if (xMenu.Item("KillI").GetValue<bool>() == true)
+
+            if (xMenu.Item("KillI").GetValue<bool>() == true && player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
-                if (IgniteSlot != SpellSlot.Unknown &&
-                    player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                if (igniteDmg > target.Health && player.Distance(target, false) < 600)
                 {
-                    if (target.Health <= GetIgniteDamage(target))
-                    {
-                        player.SummonerSpellbook.CastSpell(IgniteSlot, target);
-                    }
+                    player.Spellbook.CastSpell(IgniteSlot, target);
                 }
 
             }
@@ -294,7 +290,7 @@ namespace xAkali
             
 
 
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target == null)
                 return;
             {
@@ -316,7 +312,7 @@ namespace xAkali
 
         public static void Combo()
         {
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target == null) return;
 
             float dmg = ComboDamage(target);

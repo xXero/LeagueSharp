@@ -50,7 +50,7 @@ namespace Ezreal
             Orbwalker = new Orbwalking.Orbwalker(xMenu.SubMenu("Orbwalker"));
           
             var ts = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(ts);
+            TargetSelector.AddToMenu(ts);
             xMenu.AddSubMenu(ts);
            
             xMenu.AddSubMenu(new Menu("Combo", "Combo"));
@@ -107,11 +107,7 @@ namespace Ezreal
         }
 
 
-        private static float GetIgniteDamage(Obj_AI_Hero enemy)
-        {
-            if (IgniteSlot == SpellSlot.Unknown || player.SummonerSpellbook.CanUseSpell(IgniteSlot) != SpellState.Ready) return 0f;
-            return (float)player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
-        }
+      
 
         static void Drawing_OnDraw(EventArgs args)
         {
@@ -137,8 +133,9 @@ namespace Ezreal
 
         public static void KillSteal()
         {
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target == null) return;
+            var igniteDmg = player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
 
             if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("KillQ").GetValue<bool>() == true && ObjectManager.Player.GetSpellDamage(target, SpellSlot.Q) > target.Health)
             {
@@ -156,15 +153,11 @@ namespace Ezreal
             }
 
 
-            if (xMenu.Item("KillI").GetValue<bool>() == true)
+            if (xMenu.Item("KillI").GetValue<bool>() == true && player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
-                if (IgniteSlot != SpellSlot.Unknown &&
-                    player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                if (igniteDmg > target.Health && player.Distance(target, false) < 600)
                 {
-                    if (target.Health + 20 <= GetIgniteDamage(target))
-                    {
-                        player.SummonerSpellbook.CastSpell(IgniteSlot, target);
-                    }
+                    player.Spellbook.CastSpell(IgniteSlot, target);
                 }
 
             }
@@ -182,7 +175,7 @@ namespace Ezreal
                 return;
             
 
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target == null)
                 return;
             {
@@ -209,7 +202,7 @@ namespace Ezreal
 
         public static void Combo()
         {
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target == null) return;
 
 

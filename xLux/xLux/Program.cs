@@ -13,6 +13,7 @@ namespace xLux
     class Program
     {
         public static string ChampName = "Lux";
+        
         public static Orbwalking.Orbwalker Orbwalker;
         private static readonly Obj_AI_Hero player = ObjectManager.Player;
         public static Spell Q, E, E2, R;
@@ -44,6 +45,9 @@ namespace xLux
 
             IgniteSlot = player.GetSpellSlot("SummonerDot");
 
+
+
+            
             
             xMenu = new Menu("x" + ChampName, ChampName, true);
           
@@ -51,7 +55,7 @@ namespace xLux
             Orbwalker = new Orbwalking.Orbwalker(xMenu.SubMenu("Orbwalker"));
             
             var ts = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(ts);
+           TargetSelector.AddToMenu(ts);
             xMenu.AddSubMenu(ts);
            
             xMenu.AddSubMenu(new Menu("Combo", "Combo"));
@@ -89,6 +93,8 @@ namespace xLux
             xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawR", "DrawR?").SetValue(true));
             xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawAA", "Draw Range?").SetValue(true));
             xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawHP", "Draw Damage?").SetValue(true));
+            xMenu.SubMenu("Drawing").AddItem(new MenuItem("DrawLine", "Draw a Line?").SetValue(true));
+
 
             xMenu.AddSubMenu(new Menu("Misc", "Misc"));
             xMenu.SubMenu("Misc").AddItem(new MenuItem("Packet", "Packet Casting").SetValue(true));
@@ -105,7 +111,7 @@ namespace xLux
             Game.OnGameUpdate += Game_OnGameUpdate;
             Game.PrintChat("x" + ChampName);
             GameObject.OnCreate += OnCreateObject;
-            GameObject.OnDelete += OnDeleteObject;	
+            
         }
 
         static void Game_OnGameUpdate(EventArgs args)
@@ -126,6 +132,8 @@ namespace xLux
             }
             JungleSteal();
             KillSteal();
+
+           
         }
 
         private static void OnCreateObject(GameObject sender, EventArgs args)
@@ -137,23 +145,17 @@ namespace xLux
             }
         }
 
-        private static void OnDeleteObject(GameObject sender, EventArgs args)
-        {
-            if (sender.Name.Contains("LuxLightstrike_tar_green"))
-            {
-                E2TargetObject = null;
-                return;
-            }
-        }	
+   
+   
+      
+     
 
-        private static float GetIgniteDamage(Obj_AI_Hero enemy)
-        {
-            if (IgniteSlot == SpellSlot.Unknown || player.SummonerSpellbook.CanUseSpell(IgniteSlot) != SpellState.Ready) return 0f;
-            return (float)player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
-        }
+
+     
 
         static void Drawing_OnDraw(EventArgs args)
         {
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (xMenu.Item("DrawQ").GetValue<bool>() == true)
             {
                 Utility.DrawCircle(ObjectManager.Player.Position, Q.Range, Color.Red);
@@ -173,9 +175,36 @@ namespace xLux
             {
                 Utility.DrawCircle(ObjectManager.Player.Position, ObjectManager.Player.AttackRange, Color.Red);
             }
-
         }
 
+            
+     float x()
+        {
+            return player.Position.X;
+        }
+
+     float y()
+     {
+         return player.Position.Y;
+     }
+
+     float x2()
+     {
+         var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+         return target.Position.X;
+     }
+
+     float y2()
+     {
+         var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+         return target.Position.Y;
+     }
+     
+       
+
+
+
+      
         private static float GetDistanceSqr(Obj_AI_Hero source, Obj_AI_Base Target)
         {
             return Vector2.DistanceSquared(source.Position.To2D(), Target.ServerPosition.To2D());
@@ -201,8 +230,8 @@ namespace xLux
             if (E.IsReady())
                 damage += player.GetSpellDamage(enemy, SpellSlot.E);
 
-            if (IgniteSlot != SpellSlot.Unknown && player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-                damage += ObjectManager.Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
+            if (player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                damage += player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
 
             if (Items.HasItem(3155, (Obj_AI_Hero)enemy))
             {
@@ -254,8 +283,11 @@ namespace xLux
 
         public static void KillSteal()
         {
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target == null) return;
+            var igniteDmg = player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
+
+            if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("KillQ").GetValue<bool>() == true && ObjectManager.Player.GetSpellDamage(target, SpellSlot.Q) > target.Health)
 
             if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("KillQ").GetValue<bool>() == true && ObjectManager.Player.GetSpellDamage(target, SpellSlot.Q) > target.Health)
             {
@@ -274,15 +306,11 @@ namespace xLux
             }
 
 
-            if (xMenu.Item("KillI").GetValue<bool>() == true)
+            if (xMenu.Item("KillI").GetValue<bool>() == true && player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
             {
-                if (IgniteSlot != SpellSlot.Unknown &&
-                    player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                if (igniteDmg > target.Health && player.Distance(target, false) < 600)
                 {
-                    if (target.Health <= GetIgniteDamage(target))
-                    {
-                        player.SummonerSpellbook.CastSpell(IgniteSlot, target);
-                    }
+                    player.Spellbook.CastSpell(IgniteSlot, target);
                 }
 
             }
@@ -299,7 +327,7 @@ namespace xLux
                 return;
 
 
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target == null)
                 return;
             {
@@ -324,7 +352,7 @@ namespace xLux
 
         public static void Combo()
         {
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target == null) return;
 
             float dmg = ComboDamage(target);

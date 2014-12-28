@@ -52,7 +52,7 @@ namespace xFizz
             Orbwalker = new Orbwalking.Orbwalker(xMenu.SubMenu("Orbwalker"));
 
             var ts = new Menu("Target Selector", "Target Selector");
-            SimpleTs.AddToMenu(ts);
+            TargetSelector.AddToMenu(ts);
             xMenu.AddSubMenu(ts);
 
             xMenu.AddSubMenu(new Menu("Combo", "Combo"));
@@ -114,11 +114,7 @@ namespace xFizz
         }
 
 
-        private static float GetIgniteDamage(Obj_AI_Hero enemy)
-        {
-            if (IgniteSlot == SpellSlot.Unknown || player.SummonerSpellbook.CanUseSpell(IgniteSlot) != SpellState.Ready) return 0f;
-            return (float)player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
-        }
+     
 
         static void Drawing_OnDraw(EventArgs args)
         {
@@ -144,8 +140,9 @@ namespace xFizz
 
         public static void KillSteal()
         {
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target == null) return;
+            var igniteDmg = player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
 
             if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("KillQ").GetValue<bool>() == true && ObjectManager.Player.GetSpellDamage(target, SpellSlot.Q) > target.Health)
             {
@@ -160,21 +157,17 @@ namespace xFizz
 
             if (target.IsValidTarget(R.Range) && R.IsReady() && xMenu.Item("KillR").GetValue<bool>() && player.GetSpellDamage(target, SpellSlot.R) > target.Health +20)
 
-           
 
 
-            if (xMenu.Item("KillI").GetValue<bool>() == true)
-            {
-                if (IgniteSlot != SpellSlot.Unknown &&
-                    player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+
+                if (xMenu.Item("KillI").GetValue<bool>() == true && player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
                 {
-                    if (target.Health + 20 <= GetIgniteDamage(target))
+                    if (igniteDmg > target.Health && player.Distance(target, false) < 600)
                     {
-                        player.SummonerSpellbook.CastSpell(IgniteSlot, target);
+                        player.Spellbook.CastSpell(IgniteSlot, target);
                     }
-                }
 
-            }
+                }
 
 
 
@@ -194,7 +187,7 @@ namespace xFizz
                 return;
 
 
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target == null)
                 return;
             {
@@ -237,9 +230,8 @@ namespace xFizz
             if (E.IsReady())
                 damage += player.GetSpellDamage(enemy, SpellSlot.E);
 
-            if (IgniteSlot != SpellSlot.Unknown && player.SummonerSpellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
-                damage += ObjectManager.Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
-
+            if (player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)
+                damage += player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
             if (Items.HasItem(3155, (Obj_AI_Hero)enemy))
             {
                 damage = damage - 250;
@@ -254,7 +246,7 @@ namespace xFizz
 
         public static void Combo()
         {
-            var target = SimpleTs.GetTarget(Q.Range, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (target == null) return;
             float dmg = ComboDamage(target);
 
