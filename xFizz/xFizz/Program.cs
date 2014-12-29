@@ -57,6 +57,7 @@ namespace xFizz
 
             xMenu.AddSubMenu(new Menu("Combo", "Combo"));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useQ", "Use Q?").SetValue(true));
+            xMenu.SubMenu("Combo").AddItem(new MenuItem("QR", "Use Q+R (Almost hidden R)?").SetValue(true));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useW", "Use W?").SetValue(true));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useE", "Use E?").SetValue(true));
             xMenu.SubMenu("Combo").AddItem(new MenuItem("useR", "Use R?").SetValue(true));
@@ -258,7 +259,7 @@ namespace xFizz
                          }
                     if (target.IsValidTarget(Q.Range) && W.IsReady() && xMenu.Item("useW").GetValue<bool>() == true)
                     {
-                        W.Cast(target, xMenu.Item("Packet").GetValue<bool>());
+                        W.Cast(player, xMenu.Item("Packet").GetValue<bool>());
                     }
                     if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
                     {
@@ -283,12 +284,25 @@ namespace xFizz
             }
             else
             {
-                if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
+                if (xMenu.Item("QR").GetValue<bool>())
                 {
-                    Q.CastOnUnit(target, xMenu.Item("Packet").GetValue<bool>());
+                    if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
+                    {
+                        Q.CastOnUnit(target, xMenu.Item("Packet").GetValue<bool>());
+                        R.Cast(target, xMenu.Item("Packet").GetValue<bool>());
 
 
 
+                    }
+                    else
+                    {
+
+                        if (target.IsValidTarget(Q.Range) && Q.IsReady() && xMenu.Item("useQ").GetValue<bool>() == true)
+                        {
+                            Q.CastOnUnit(target, xMenu.Item("Packet").GetValue<bool>());
+
+                        }
+                    }
                 }
                 if (target.IsValidTarget(E.Range) && E.IsReady() && xMenu.Item("useE").GetValue<bool>() == true)
                 {
